@@ -208,6 +208,7 @@ INSTALLED_APPS = [
     "allauth.mfa",
     "huey.contrib.djhuey",
     "storages",
+    "chatbot",
 ]
 
 MIDDLEWARE = [

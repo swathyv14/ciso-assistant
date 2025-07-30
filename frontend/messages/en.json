@@ -935,6 +935,7 @@
 	"filteringLabels": "Labels",
 	"invalidLabel": "Label must be alphanumeric and contain at most 36 characters",
 	"myAssignments": "My assignments",
+	"chatbot": "AI Assistant",
 	"assignedRisks": "Assigned risks",
 	"controls": "Controls",
 	"exploreButton": "Explore",

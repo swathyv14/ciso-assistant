@@ -37,6 +37,11 @@ export const navData = {
 						'view_assessment',
 						'view_riskassessment'
 					]
+				},
+				{
+					name: 'chatbot',
+					fa_icon: 'fa-solid fa-robot',
+					href: '/chatbot'
 				}
 			]
 		},

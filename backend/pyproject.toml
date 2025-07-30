@@ -45,6 +45,10 @@ boto3 = "^1.38.1"
 django-storages = "^1.14.6"
 icecream = "^2.1.4"
 regex = "^2024.11.6"
+google-adk = "^1.8.0"
+google-cloud-aiplatform = "^1.105.0"
+google-auth = "^2.40.3"
+requests = "^2.32.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest-django = "4.8.0"
