@@ -208,7 +208,7 @@ INSTALLED_APPS = [
     "allauth.mfa",
     "huey.contrib.djhuey",
     "storages",
-    "chatbot",
+    # "chatbot",  # Temporarily disabled for debugging
 ]
 
 MIDDLEWARE = [

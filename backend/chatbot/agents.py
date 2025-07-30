@@ -6,17 +6,23 @@ from django.conf import settings
 from django.urls import reverse
 import requests
 
-try:
-    from google.adk.agents import LlmAgent
-    from google.adk.tools import FunctionTool
-    from google.genai import Client as GenAIClient
-    ADK_AVAILABLE = True
-except ImportError:
-    # Fallback for when Google ADK is not available
-    ADK_AVAILABLE = False
-    LlmAgent = None
-    FunctionTool = None
-    GenAIClient = None
+# Temporarily disable Google ADK to debug startup issues
+ADK_AVAILABLE = False
+LlmAgent = None
+FunctionTool = None
+GenAIClient = None
+
+# try:
+#     from google.adk.agents import LlmAgent
+#     from google.adk.tools import FunctionTool
+#     from google.genai import Client as GenAIClient
+#     ADK_AVAILABLE = True
+# except ImportError:
+#     # Fallback for when Google ADK is not available
+#     ADK_AVAILABLE = False
+#     LlmAgent = None
+#     FunctionTool = None
+#     GenAIClient = None
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +102,23 @@ class CISOAssistantAgent:
                 self.agent = None
                 return
 
-            self.client = GenAIClient(api_key=api_key)
+            # Don't initialize the actual client during Django startup to avoid blocking
+            # We'll initialize it lazily when needed
+            self.client = None
+            self.agent = "lazy_init"  # Marker for lazy initialization
+
+        except Exception as e:
+            logger.error(f"Failed to initialize agent: {str(e)}")
+            self.agent = None
+
+    def _lazy_init_agent(self):
+        """Lazy initialization of the Google ADK agent."""
+        if not ADK_AVAILABLE or not os.getenv('GOOGLE_API_KEY'):
+            return False
+
+        try:
+            if not self.client:
+                self.client = GenAIClient(api_key=os.getenv('GOOGLE_API_KEY'))
 
             # Create function tools for CISO Assistant API
             api_tools = self._create_api_tools()
@@ -112,9 +134,12 @@ class CISOAssistantAgent:
                 tools=api_tools
             )
 
+            return True
+
         except Exception as e:
-            logger.error(f"Failed to initialize agent: {str(e)}")
+            logger.error(f"Failed to lazy initialize agent: {str(e)}")
             self.agent = None
+            return False
     
     def _create_api_tools(self) -> List:
         """Create function tools for CISO Assistant API endpoints."""
@@ -215,6 +240,11 @@ Always be helpful, professional, and focused on cybersecurity best practices.
             Agent's response
         """
         try:
+            # Handle lazy initialization
+            if self.agent == "lazy_init":
+                if not self._lazy_init_agent():
+                    return self._fallback_response(message, context)
+
             if not self.agent:
                 # Fallback response when ADK is not available
                 return self._fallback_response(message, context)
